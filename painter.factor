@@ -1,15 +1,14 @@
 ! Copyright (C) 2022 Your name.
 ! See http://factorcode.org/license.txt for BSD license.
 
-USING: accessors arrays bresenham bresenham-cat byte-vectors
-colors combinators combinators.smart continuations file-picker
-formatting images images.loader images.viewer io io.pathnames
-kernel math math.functions math.order math.parser models
-models.arrow models.product models.range namespaces prettyprint
-sequences sequences.deep ui ui.gadgets ui.gadgets.borders
-ui.gadgets.buttons ui.gadgets.labels ui.gadgets.packs
-ui.gadgets.sliders ui.gadgets.tracks ui.gestures ui.pens.solid
-ui.tools.listener vocabs.loader ;
+USING: accessors arrays bresenham byte-vectors colors
+combinators combinators.smart continuations file-picker
+formatting images images.loader images.viewer io.pathnames
+kernel math math.functions math.order models models.arrow
+models.product models.range namespaces sequences sequences.deep
+ui ui.gadgets ui.gadgets.borders ui.gadgets.buttons
+ui.gadgets.labels ui.gadgets.sliders ui.gadgets.tracks
+ui.gestures ui.pens.solid ;
 FROM: models => change-model ;
 IN: painter
 
@@ -44,10 +43,10 @@ SYMBOL: bounds { 512 512 } bounds set-global
 
 : make-image ( -- image )
     <image> 
-        get-bounds >>dim 
-        RGB >>component-order
+        get-bounds       >>dim 
+        RGB              >>component-order
         ubyte-components >>component-type
-        create-bitmap >>bitmap ;
+        create-bitmap    >>bitmap ;
 
 : get-range-value ( range-model -- fixnum )
     value>> first >fixnum ;
@@ -131,7 +130,7 @@ M: color-preview model-changed
         [ drop image-model>> ]
         [ drop get-rgb ]
         [ [ curr-xy>> ] [ [ + ] 2map ] bi* ]
-        [ [  old-xy>> ] [ [ + ] 2map ] bi*  ] 
+        [ [  old-xy>> ] [ [ + ] 2map ] bi* ] 
     } 2cleave bresenham '[ [ _ _ (stroke) ] keep ] change-model ;
 
 : place-pen ( gadget -- gadget )
