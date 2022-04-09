@@ -37,21 +37,24 @@ TUPLE: painting-gadget < image-control r g b rgb curr-xy old-xy brush-size ;
 : place-pen ( gadget -- )
     dup get-image-pos [ >>curr-xy drop ] [ >>old-xy drop ] 2bi ;
 
-: (update-pixel) ( rgb x y image-model -- )
-    [ [ set-pixel-at ] keep ] change-model ;
+: update-image ( rgb x y image -- image )
+    [ set-pixel-at ] keep ;
+
+: (draw-pixel) ( rgb x y image-model -- )
+    [ update-image ] change-model ;
 
 : draw-pixel ( rgb image-model pixel -- )
-    swap [ first2 ] [ (update-pixel) ] bi* ;
+    get-bounds clamp-pos swap [ first2 ] [ (draw-pixel) ] bi* ;
 
 : draw-pixels ( rgb image-model offsets pixel -- )
    [ vs+ draw-pixel ] curry 2with each ;
 
-: update-pixel ( gadget -- )
+: place-pixels ( gadget -- )
     {
-        [ get-rgb ] 
-        [ model>> ] 
-        [ get-brush-area ] 
-        [ get-image-pos ] 
+        [ get-rgb ]
+        [ model>> ]
+        [ get-brush-area ]
+        [ get-image-pos ]
     } cleave draw-pixels ;
 
 : swap-curr-and-old ( gadget -- )
@@ -60,36 +63,36 @@ TUPLE: painting-gadget < image-control r g b rgb curr-xy old-xy brush-size ;
 : move-to-input ( gadget -- )
     dup get-image-pos >>curr-xy drop ;
 
-: move-pen ( gadget -- ) 
-     [ swap-curr-and-old ] [ move-to-input ] bi ;
+: move-pen ( gadget -- )
+    [ swap-curr-and-old ] [ move-to-input ] bi ;
 
-:: (stroke) ( image rgb points -- ) 
-    points [ get-bounds clamp-pos [ rgb ] dip first2 image set-pixel-at ] each ;
+: draw-stroke ( rgb image-model points -- )
+    [ draw-pixel ] 2with each ;
 
 : stroke ( gadget offset -- )
     {
-        [ drop model>> ]
         [ drop get-rgb ]
+        [ drop model>> ]
         [ [ curr-xy>> ] [ vs+ ] bi* ]
-        [ [  old-xy>> ] [ vs+ ] bi* ] 
-    } 2cleave bresenham '[ [ _ _ (stroke) ] keep ] change-model ;
+        [ [  old-xy>> ] [ vs+ ] bi* ]
+    } 2cleave bresenham draw-stroke ;
 
 : prepare-stroke-n ( gadget -- draw-calls )
     get-brush-area [ '[ _ stroke ] ] map ;
 
-:: (stroke-n)  ( draw-calls gadget -- )
-    gadget draw-calls [ call( gadget -- ) ] with each ;
+: (stroke-n)  ( draw-calls gadget -- )
+    swap [ call( gadget -- ) ] with each ;
 
 : stroke-n ( gadget -- )
     [ prepare-stroke-n ] [ (stroke-n) ] bi ;
 
 : pen-down ( gadget -- )
-    [ place-pen ] [ update-pixel ] bi ;
+    [ place-pen ] [ place-pixels ] bi ;
 
 : paint ( gadget -- )
     [ move-pen ] [ stroke-n ] bi ;
 
-painting-gadget H{ 
+painting-gadget H{
     { T{ button-down } [ pen-down ] }
     { T{ drag } [ paint ] }
 } set-gestures
