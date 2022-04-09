@@ -58,14 +58,14 @@ TUPLE: painting-gadget < image-control r g b rgb curr-xy old-xy brush-size ;
         [ get-image-pos ]
     } cleave draw-pixels ;
 
-: swap-curr-and-old ( gadget -- )
+: make-curr-old ( gadget -- )
     dup curr-xy>> >>old-xy drop ;
 
 : move-to-input ( gadget -- )
     dup get-image-pos >>curr-xy drop ;
 
 : move-pen ( gadget -- )
-    [ swap-curr-and-old ] [ move-to-input ] bi ;
+    [ make-curr-old ] [ move-to-input ] bi ;
 
 : draw-stroke ( rgb image-model points -- )
     [ draw-pixel ] 2with each ;
