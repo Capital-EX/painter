@@ -7,6 +7,7 @@ HELP: run-painter
 { $description "Starts the painting program." } ;
 
 ARTICLE: "painter" "Factor Painting Program"
+{ $vocab-link "painter" }
 "A small painting program written in Factor. To run the program use:"
 { $code "run-painter" }
 ;
