@@ -1,4 +1,4 @@
-! Copyright (C) 2022 Your name.
+! Copyright (C) 2022 Capital Ex.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors combinators combinators.smart kernel namespaces
 painter.ui.color-preview painter.ui.painting-gadget

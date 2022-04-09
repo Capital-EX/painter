@@ -1,4 +1,4 @@
-! Copyright (C) 2022 Your name.
+! Copyright (C) 2022 Capital Ex.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: help.markup help.syntax ;
 IN: painter
