@@ -4,5 +4,5 @@
 USING: accessors painter.ui ui ;
 IN: painter
 
-MAIN-WINDOW: run-painter { { title "title" } }
+MAIN-WINDOW: run-painter { { title "Factor Paintor" } }
     <painter> >>gadgets ;
