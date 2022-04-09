@@ -1,13 +1,13 @@
 ! Copyright (C) 2022 Your name.
 ! See http://factorcode.org/license.txt for BSD license.
 USING: accessors bresenham combinators combinators.smart images
-images.viewer kernel math models painter.images
+images.viewer kernel math math.vectors models painter.images
 painter.ui.sliders painter.ui.symbols painter.ui.theming
 painter.utils sequences ui.gestures ;
 FROM: models => change-model ;
 IN: painter.ui.painting-gadget
 
-TUPLE: painting-gadget < image-control image-model r g b rgb curr-xy old-xy brush-size ;
+TUPLE: painting-gadget < image-control r g b rgb curr-xy old-xy brush-size ;
 : <painting-gadget> ( -- gadget )
     painting-gadget new
         { 0 0 }       >>curr-xy 
@@ -16,8 +16,14 @@ TUPLE: painting-gadget < image-control image-model r g b rgb curr-xy old-xy brus
         <color-range> >>g
         <color-range> >>b
         <brush-range> >>brush-size
-    get-bounds <blank-image> <model> [ >>image-model ] keep set-image
+    get-bounds <blank-image> <model> [ >>model ] keep set-image
     solid-black-border! ;
+
+: get-brush-size ( gadget -- brush-size )
+    brush-size>> get-range-value ;
+
+: get-brush-area ( gadget -- brush-square )
+    get-brush-size square ;
 
 : get-rgb-ranges ( painter -- r-range b-range g-range ) 
     [ r>> ] [ g>> ] [ b>> ] tri ;
@@ -28,48 +34,60 @@ TUPLE: painting-gadget < image-control image-model r g b rgb curr-xy old-xy brus
 : get-image-pos ( painting-gadget -- xy )
     hand-rel get-bounds clamp-pos ;
 
-: place-pen ( gadget -- gadget )
-    dup dup get-image-pos [ >>curr-xy drop ] [ >>old-xy drop ] 2bi ;
+: place-pen ( gadget -- )
+    dup get-image-pos [ >>curr-xy drop ] [ >>old-xy drop ] 2bi ;
 
 : (update-pixel) ( rgb x y image-model -- )
     [ [ set-pixel-at ] keep ] change-model ;
 
+: draw-pixel ( rgb image-model pixel -- )
+    swap [ first2 ] [ (update-pixel) ] bi* ;
+
+: draw-pixels ( rgb image-model offsets pixel -- )
+   [ vs+ draw-pixel ] curry 2with each ;
+
 : update-pixel ( gadget -- )
-    [ get-rgb ] 
-    [ get-image-pos first2 ] 
-    [ image-model>> ] tri (update-pixel) ;
+    {
+        [ get-rgb ] 
+        [ model>> ] 
+        [ get-brush-area ] 
+        [ get-image-pos ] 
+    } cleave draw-pixels ;
 
-: move-pen ( gadget -- gadget )
-    dup [ curr-xy>> ] [ get-image-pos ] bi [ >>old-xy ] dip >>curr-xy  ;
+: swap-curr-and-old ( gadget -- )
+    dup curr-xy>> >>old-xy drop ;
 
-: get-brush-size ( gadget -- gadget brush-size )
-    dup brush-size>> get-range-value ;
+: move-to-input ( gadget -- )
+    dup get-image-pos >>curr-xy drop ;
+
+: move-pen ( gadget -- ) 
+     [ swap-curr-and-old ] [ move-to-input ] bi ;
 
 :: (stroke) ( image rgb points -- ) 
     points [ get-bounds clamp-pos [ rgb ] dip first2 image set-pixel-at ] each ;
 
 : stroke ( gadget offset -- )
     {
-        [ drop image-model>> ]
+        [ drop model>> ]
         [ drop get-rgb ]
-        [ [ curr-xy>> ] [ [ + ] 2map ] bi* ]
-        [ [  old-xy>> ] [ [ + ] 2map ] bi* ] 
+        [ [ curr-xy>> ] [ vs+ ] bi* ]
+        [ [  old-xy>> ] [ vs+ ] bi* ] 
     } 2cleave bresenham '[ [ _ _ (stroke) ] keep ] change-model ;
 
-: prepare-stroke-n ( points -- draw-calls )
-    [ '[ _ stroke ] ] map ;
+: prepare-stroke-n ( gadget -- draw-calls )
+    get-brush-area [ '[ _ stroke ] ] map ;
 
-: (stroke-n)  ( gadget draw-calls -- )
-    [ dupd call( gadget -- ) ] each drop ;
+:: (stroke-n)  ( draw-calls gadget -- )
+    gadget draw-calls [ call( gadget -- ) ] with each ;
 
-: stroke-n ( gadget n -- )
-    square prepare-stroke-n (stroke-n) ;
+: stroke-n ( gadget -- )
+    [ prepare-stroke-n ] [ (stroke-n) ] bi ;
 
 : pen-down ( gadget -- )
-    place-pen update-pixel ;
+    [ place-pen ] [ update-pixel ] bi ;
 
 : paint ( gadget -- )
-    move-pen get-brush-size stroke-n  ;
+    [ move-pen ] [ stroke-n ] bi ;
 
 painting-gadget H{ 
     { T{ button-down } [ pen-down ] }

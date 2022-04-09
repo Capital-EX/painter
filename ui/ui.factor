@@ -26,7 +26,7 @@ IN: painter.ui
             [ g>> "Green: %02x" <labeled-slider> ]
             [ b>> "Blue: %02x" <labeled-slider> ] 
             [ brush-size>> "Brush Size: %d" <labeled-slider> ]
-            [ image-model>> <save-button> { 5 5 } <border> { 1 1 } >>fill ]
+            [ model>> <save-button> { 5 5 } <border> { 1 1 } >>fill ]
             [ get-rgb-ranges <color-preview> { 0 0 } <border>  ]
             [ get-rgb-ranges <color-string-model> <label-control> { 0 0 } <border> ]
         } cleave
