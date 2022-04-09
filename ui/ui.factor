@@ -11,7 +11,7 @@ IN: painter.ui
     swap 1 track-add ;
 
 : add-painter ( painter-gadget track -- track ) 
-    swap f track-add { 10 10 } >>gap ;
+    swap { 10 10 } <border> f track-add { 10 10 } >>gap ;
 
 : pad ( gadget -- gadget )
     { 10 10 } <filled-border> { 800 0 } >>min-dim ;
