@@ -1,5 +1,6 @@
 ! Copyright (C) 2022 Capital Ex.
 ! See http://factorcode.org/license.txt for BSD license.
+
 USING: accessors bresenham combinators combinators.smart images
 images.viewer kernel math math.vectors models painter.images
 painter.ui.sliders painter.ui.symbols painter.ui.theming
@@ -10,7 +11,7 @@ IN: painter.ui.painting-gadget
 TUPLE: painting-gadget < image-control r g b rgb curr-xy old-xy brush-size ;
 : <painting-gadget> ( -- gadget )
     painting-gadget new
-        { 0 0 }       >>curr-xy 
+        { 0 0 }       >>curr-xy
         { 0 0 }       >>old-xy
         <color-range> >>r
         <color-range> >>g
@@ -25,7 +26,7 @@ TUPLE: painting-gadget < image-control r g b rgb curr-xy old-xy brush-size ;
 : get-brush-area ( gadget -- brush-square )
     get-brush-size square ;
 
-: get-rgb-ranges ( painter -- r-range b-range g-range ) 
+: get-rgb-ranges ( painter -- r-range b-range g-range )
     [ r>> ] [ g>> ] [ b>> ] tri ;
 
 : get-rgb ( painting-gadget -- rgb )
